@@ -24,12 +24,19 @@ export const findUserById = (id: string): User | undefined => {
   return users.find(user => user.id === id);
 };
 
-export const createUser = (user: Omit<User, 'id' | 'created_at'>): User => {
-  const newUser: User = {
-    ...user,
-    id: Date.now().toString(),
-    created_at: new Date().toISOString()
-  };
-  users.push(newUser);
-  return newUser;
+export const createUser = async (user: Omit<User, 'id' | 'created_at'>): Promise<User> => {
+  const mockDelay = Math.random() * 10;
+
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const newUser: User = {
+        ...user,
+        id: Date.now().toString(),
+        created_at: new Date().toISOString()
+      };
+      
+      users.push(newUser);
+      resolve(newUser);
+    }, mockDelay);
+  });
 };

@@ -1,8 +1,6 @@
 ---
-alwaysApply: true
+alwaysApply: false
 ---
-
-
 We will be building out APIs to cover the following:
 
 ### Key API Design Practice Areas

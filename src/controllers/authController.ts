@@ -5,20 +5,41 @@ import jwt from 'jsonwebtoken';
 import { findUserByEmail, createUser, User } from '../models/userModel.js';
 
 export const signup = async (req: Request, res: Response) => {
-  // TODO: Implement user signup
-  // 1. Validate email and password from req.body
-  // 2. Check if user already exists
-  // 3. Hash password with bcrypt.hash()
-  // 4. Create new user in database
-  // 5. Return user info (without password)
-  
-  const { email, password } = req.body ?? {};
-  
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
-  }
+  try {
+    const { email, password } = req.body ?? {};
+    
+    if (!email || !password) {
+      console.log('❌ Missing email or password');
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
 
-  return res.status(501).json({ message: 'Signup not implemented yet' });
+    // Check if user already exists
+    const existingUser = findUserByEmail(email);
+    if (existingUser) {
+      return res.status(409).json({ message: 'Email already exists' });
+    }
+
+    // Hash password with bcrypt
+    const saltRounds = 10;
+    const password_hash = await bcrypt.hash(password, saltRounds);
+
+    // Create new user
+    const newUser = await createUser({
+      email,
+      password_hash
+    });
+
+    // Return user info without password
+    return res.status(201).json({
+      id: newUser.id,
+      email: newUser.email,
+      created_at: newUser.created_at
+    });
+
+  } catch (error) {
+    console.error('Signup error:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 };
 
 export const login = async (req: Request, res: Response) => {
