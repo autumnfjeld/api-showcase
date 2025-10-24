@@ -1,0 +1,136 @@
+---
+alwaysApply: true
+---
+
+
+We will be building out APIs to cover the following:
+
+### Key API Design Practice Areas
+
+- User Authentication: Implement endpoints for user signup, login, and session validation. Common techniques include token-based authentication (like JWT) and using HTTPS to protect credentials during transmission. Prepare to discuss how you’d secure APIs and differentiate authentication (verifying identity) from authorization (permission to access resources).
+- Resource CRUD Operations: Build APIs that allow clients to Create, Read, Update, and Delete resources (CRUD), such as user profiles or posts. Include:
+    - Standard RESTful HTTP methods (GET, POST, PUT, DELETE)
+    - Handling URL parameters, query filtering, and pagination for listing/search endpoints.
+
+### Advanced API Scenarios:
+
+- Search and Filtering:  Design endpoints with query parameters to filter and search data efficiently.
+- Real-Time Data Streaming:   For scenarios where live data is required (like notifications or activity feeds), discuss options such as WebSockets or server-sent events, even if you only mock them as REST endpoints for the interview.
+- Batch Processing: APIs that handle bulk uploads or modifications. Be ready to explain how you’d process multiple records in a single request and return batch results.
+- Error Handling and Debugging: Implement structured error responses using appropriate HTTP status codes (4xx for client, 5xx for server errors), and return clear JSON error messages. Show how you’d log errors for debugging and document error patterns.
+
+
+
+We will work in node.js and Typescript.
+
+
+We’ll build a User Authentication API in three passes: design, implementation, and trade-off analysis.
+
+⸻
+
+1. High-Level Design
+
+Base URL: /auth
+
+Action	Method	Route	Description
+Sign up	POST	/signup	Register a new user
+Log in	POST	/login	Authenticate and return token
+Refresh token	POST	/refresh	Renew access token using refresh token
+Get profile	GET	/me	Return user info from token
+
+Core entities
+
+User {
+  id: string
+  email: string
+  password_hash: string
+  created_at: string
+}
+TokenPair {
+  access_token: string
+  refresh_token: string
+  expires_in: number
+}
+
+Auth flow
+	1.	POST /signup → store user (hashed password via bcrypt)
+	2.	POST /login → verify credentials → issue JWT access + refresh
+	3.	POST /refresh → validate refresh token → issue new access token
+	4.	GET /me → verify access token → return user info
+
+⸻
+
+2. Implementation (Node + Express + JWT)
+
+// authRoutes.js
+import express from 'express'
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
+import { users } from './mockDB.js' // temporary in-memory store
+
+const router = express.Router()
+const SECRET = 'jwt_secret'
+const REFRESH_SECRET = 'refresh_secret'
+
+// signup
+router.post('/signup', async (req, res) => {
+  const { email, password } = req.body
+  if (users.find(u => u.email === email))
+    return res.status(409).json({ message: 'Email already exists' })
+  const hash = await bcrypt.hash(password, 10)
+  const newUser = { id: Date.now().toString(), email, password_hash: hash }
+  users.push(newUser)
+  res.status(201).json({ id: newUser.id, email })
+})
+
+// login
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body
+  const user = users.find(u => u.email === email)
+  if (!user || !(await bcrypt.compare(password, user.password_hash)))
+    return res.status(401).json({ message: 'Invalid credentials' })
+  const access = jwt.sign({ id: user.id }, SECRET, { expiresIn: '15m' })
+  const refresh = jwt.sign({ id: user.id }, REFRESH_SECRET, { expiresIn: '7d' })
+  res.json({ access_token: access, refresh_token: refresh })
+})
+
+// refresh
+router.post('/refresh', (req, res) => {
+  const { refresh_token } = req.body
+  try {
+    const payload = jwt.verify(refresh_token, REFRESH_SECRET)
+    const access = jwt.sign({ id: payload.id }, SECRET, { expiresIn: '15m' })
+    res.json({ access_token: access })
+  } catch {
+    res.status(401).json({ message: 'Invalid refresh token' })
+  }
+})
+
+// me
+router.get('/me', (req, res) => {
+  const auth = req.headers.authorization
+  if (!auth) return res.status(401).json({ message: 'Missing token' })
+  try {
+    const token = auth.split(' ')[1]
+    const payload = jwt.verify(token, SECRET)
+    const user = users.find(u => u.id === payload.id)
+    res.json({ id: user.id, email: user.email })
+  } catch {
+    res.status(401).json({ message: 'Invalid or expired token' })
+  }
+})
+
+export default router
+
+
+⸻
+
+Trade-offs of interest
+	•	JWT vs sessions: stateless scaling vs. server-side revocation.
+	•	Token lifespan: short access, long refresh for usability.
+	•	Security: bcrypt salt rounds, HTTPS only, store refresh tokens securely.
+	•	Error schema: consistent { code, message }. 
+	•	Extensibility: can add OAuth providers later.
+
+⸻
+
