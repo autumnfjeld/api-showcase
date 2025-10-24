@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { findUserByEmail, createUser, User } from '../models/userModel.js';
+import { config } from '../config/env.js';
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -13,8 +14,11 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
+    // Normalize email to lowercase for case-insensitive handling
+    const normalizedEmail = email.toLowerCase();
+
     // Check if user already exists
-    const existingUser = findUserByEmail(email);
+    const existingUser = findUserByEmail(normalizedEmail);
     if (existingUser) {
       return res.status(409).json({ message: 'Email already exists' });
     }
@@ -25,7 +29,7 @@ export const signup = async (req: Request, res: Response) => {
 
     // Create new user
     const newUser = await createUser({
-      email,
+      email: normalizedEmail,
       password_hash
     });
 
@@ -43,29 +47,58 @@ export const signup = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-  // TODO: Implement user login
-  // 1. Validate email and password from req.body
-  // 2. Find user by email
-  // 3. Compare password with bcrypt.compare()
-  // 4. Generate JWT access token (15min expiry)
-  // 5. Generate JWT refresh token (7 days expiry)
-  // 6. Return tokens
-  
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body ?? {};
+    
+    // Validate required fields
+    if (!email || !password) {
+      console.log('❌ Missing email or password');
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
 
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
+    // Normalize email to lowercase for case-insensitive handling
+    const normalizedEmail = email.toLowerCase();
+
+    // Find user by email
+    const user = findUserByEmail(normalizedEmail);
+    if (!user) {
+      console.log('❌ User not found for email:', email);
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Compare password with stored hash
+    const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    if (!isValidPassword) {
+      console.log('❌ Invalid password for email:', email);
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Generate JWT tokens
+    const accessToken = jwt.sign(
+      { id: user.id, email: user.email },
+      config.jwt.secret as string,
+      { expiresIn: '15m' }
+    );
+
+    const refreshToken = jwt.sign(
+      { id: user.id },
+      config.jwt.refreshSecret as string,
+      { expiresIn: '7d' }
+    );
+
+    console.log('✅ Login successful for user:', user.email);
+
+    // Return tokens
+    return res.status(200).json({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_in: 900 // 15 minutes in seconds
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
-  // TODO: Add validation of proper email and
-
-  // TODO: Find user and verify password
-  const user = findUserByEmail(email);
-  if (!user) return;
-  const valid = await bcrypt.compare(password, user.password_hash );
-  // TODO: Generate tokens
-  // TODO: Return tokens
-
-  return res.status(501).json({ message: 'Login not implemented yet' });
 };
 
 export const refresh = (req: Request, res: Response) => {
