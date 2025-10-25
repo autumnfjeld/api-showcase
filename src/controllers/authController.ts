@@ -54,7 +54,7 @@ export const login = async (req: Request, res: Response) => {
     if (!email || !password) {
       console.log('❌ Missing email or password');
       return res.status(400).json({ message: 'Email and password are required' });
-    }
+    } 
 
     // Normalize email to lowercase for case-insensitive handling
     const normalizedEmail = email.toLowerCase();
@@ -102,23 +102,45 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const refresh = (req: Request, res: Response) => {
-  // TODO: Implement token refresh
-  // 1. Get refresh_token from req.body
-  // 2. Verify refresh token with JWT_REFRESH_SECRET
-  // 3. Generate new access token
-  // 4. Return new access token
-  
-  const { refresh_token } = req.body;
+  try {
+    const { refresh_token } = req.body;
 
-  if (!refresh_token) {
-    return res.status(400).json({ message: 'Refresh token is required' });
+    if (!refresh_token) {
+      return res.status(400).json({ message: 'Refresh token is required' });
+    }
+
+    // Verify the refresh token
+    const payload = jwt.verify(refresh_token, config.jwt.refreshSecret as string) as { id: string };
+    
+    // Generate new access token using the user ID from the refresh token
+    const newAccessToken = jwt.sign(
+      { id: payload.id },
+      config.jwt.secret as string,
+      { expiresIn: '15m' }
+    );
+
+    console.log('✅ Token refreshed successfully for user ID:', payload.id);
+
+    // Return new access token
+    return res.status(200).json({
+      access_token: newAccessToken,
+      expires_in: 900 // 15 minutes in seconds
+    });
+
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    
+    // Handle JWT errors (expired, invalid, etc.)
+    if (error instanceof jwt.JsonWebTokenError) {
+      return res.status(401).json({ message: 'Invalid refresh token' });
+    }
+    
+    if (error instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({ message: 'Refresh token expired' });
+    }
+
+    return res.status(500).json({ message: 'Internal server error' });
   }
-
-  // TODO: Verify refresh token
-  // TODO: Generate new access token
-  // TODO: Return new access token
-
-  return res.status(501).json({ message: 'Refresh not implemented yet' });
 };
 
 export const me = (req: Request, res: Response) => {
