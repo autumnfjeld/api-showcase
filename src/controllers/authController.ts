@@ -144,12 +144,20 @@ export const refresh = (req: Request, res: Response) => {
 };
 
 export const me = (req: Request, res: Response) => {
-  // TODO: Return current user info
-  // This should use req.user from authMiddleware
-  // Return user info without sensitive data
-  
-  // TODO: Check if req.user exists (from middleware)
-  // TODO: Return user info
+  try {
+    // Check if req.user exists (from middleware)
+    if (!req.user) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
 
-  res.status(501).json({ message: 'Me endpoint not implemented yet' });
+    // Return user info without sensitive data
+    return res.status(200).json({
+      id: req.user.id,
+      email: req.user.email
+    });
+
+  } catch (error) {
+    console.error('Me endpoint error:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 };

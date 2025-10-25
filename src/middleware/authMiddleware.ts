@@ -2,6 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { findUserById } from '../models/userModel.js';
+import { config } from '../config/env.js';
 
 // Extend Request interface to include user
 declare global {
@@ -16,27 +17,45 @@ declare global {
 }
 
 export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-  // TODO: Implement JWT token verification
-  // 1. Extract token from Authorization header (Bearer <token>)
-  // 2. Verify token using JWT_SECRET
-  // 3. Find user by ID from token payload
-  // 4. Attach user info to req.user
-  // 5. Call next() or return 401 error
-  
-  // Get the Authorization header from the request & extract token part after Bearer
-  // Example Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+  try {
+    // Extract token from Authorization header (Bearer <token>)
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    if (!token) {
+      return res.status(401).json({ message: 'Access token required' });
+    }
 
-  if (!token) {
-    return res.status(401).json({ message: 'Access token required' });
+    // Verify token using JWT_SECRET
+    const payload = jwt.verify(token, config.jwt.secret as string) as { id: string };
+    
+    // Find user by ID from token payload
+    const user = findUserById(payload.id);
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid token - user not found' });
+    }
+
+    // Attach user info to req.user
+    req.user = {
+      id: user.id,
+      email: user.email
+    };
+
+    // Call next() to continue to the route handler
+    return next();
+
+  } catch (error) {
+    console.error('Token verification error:', error);
+    
+    // Handle JWT errors
+    if (error instanceof jwt.JsonWebTokenError) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+    
+    if (error instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({ message: 'Token expired' });
+    }
+
+    return res.status(500).json({ message: 'Internal server error' });
   }
-
-  // TODO: Implement JWT verification logic here
-  // Hint: Use jwt.verify() with process.env.JWT_SECRET
-  // Hint: Use findUserById() to get user data
-  // Hint: Set req.user with user info
-  
-  return next();
 };
