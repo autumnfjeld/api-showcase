@@ -150,6 +150,32 @@ This API demonstrates:
 
 For showcasing API design skills and prep for technical interviews.
 
+## 🚀 Planned Features (Learning Roadmap)
+
+This project demonstrates advanced API patterns through a **Social Media Analytics Dashboard**:
+
+### **Phase 1: Posts API** 
+- **Advanced search & filtering** with query parameters
+- **CRUD operations** for social media posts
+- **Pagination, sorting, and field selection**
+
+### **Phase 2: Real-time Analytics**
+- **Server-Sent Events (SSE)** for live data streaming
+- **Live engagement metrics** (likes, comments, shares)
+- **Real-time dashboard updates**
+
+### **Phase 3: Batch Processing**
+- **Bulk operations** for engagement data
+- **Batch analytics processing**
+- **Async job handling**
+
+### **Phase 4: Advanced Search**
+- **Full-text search** capabilities
+- **Faceted search** with multiple filters
+- **Search analytics and insights**
+
+Each phase builds on the previous authentication system, demonstrating modern API design patterns step-by-step for learning and interview preparation.
+
 ## 📝 License
 
 MIT License - feel free to use this code for learning and interview preparation.
