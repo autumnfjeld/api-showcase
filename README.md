@@ -22,6 +22,7 @@ A comprehensive Node.js/Express API demonstrating modern authentication patterns
 ## 📡 API Endpoints
 
 ### Authentication
+
 ```
 POST /auth/signup     - Register a new user
 POST /auth/login      - Authenticate and get tokens
@@ -30,6 +31,7 @@ GET  /auth/me         - Get current user info (protected)
 ```
 
 ### Health Check
+
 ```
 GET  /health          - Server health status
 ```
@@ -45,10 +47,11 @@ All endpoints can be tested via **Postman** or any HTTP client. The API includes
 ### Example Request Flow
 
 1. **Sign up a new user:**
+
    ```http
    POST /auth/signup
    Content-Type: application/json
-   
+
    {
      "email": "user@example.com",
      "password": "password123"
@@ -56,10 +59,11 @@ All endpoints can be tested via **Postman** or any HTTP client. The API includes
    ```
 
 2. **Login to get tokens:**
+
    ```http
    POST /auth/login
    Content-Type: application/json
-   
+
    {
      "email": "user@example.com",
      "password": "password123"
@@ -75,23 +79,27 @@ All endpoints can be tested via **Postman** or any HTTP client. The API includes
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js (v18 or higher)
 - npm or yarn
 
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone <repository-url>
    cd express-auth-api-showcase
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 3. **Create environment file:**
+
    ```bash
    # Create .env file with:
    PORT=3003
@@ -100,6 +108,7 @@ All endpoints can be tested via **Postman** or any HTTP client. The API includes
    ```
 
 4. **Start development server:**
+
    ```bash
    npm run dev
    ```
@@ -120,6 +129,7 @@ All endpoints can be tested via **Postman** or any HTTP client. The API includes
 ## 📊 Request Logging
 
 The API includes Morgan middleware for request logging. You'll see output like:
+
 ```
 POST /auth/login 200 89.123 ms - 245
 GET /auth/me 200 3.456 ms - 56
@@ -154,22 +164,26 @@ For showcasing API design skills and prep for technical interviews.
 
 This project demonstrates advanced API patterns through a **Social Media Analytics Dashboard**:
 
-### **Phase 1: Posts API** 
+### **Phase 1: Posts API**
+
 - **Advanced search & filtering** with query parameters
 - **CRUD operations** for social media posts
 - **Pagination, sorting, and field selection**
 
 ### **Phase 2: Real-time Analytics**
+
 - **Server-Sent Events (SSE)** for live data streaming
 - **Live engagement metrics** (likes, comments, shares)
 - **Real-time dashboard updates**
 
 ### **Phase 3: Batch Processing**
+
 - **Bulk operations** for engagement data
 - **Batch analytics processing**
 - **Async job handling**
 
 ### **Phase 4: Advanced Search**
+
 - **Full-text search** capabilities
 - **Faceted search** with multiple filters
 - **Search analytics and insights**

@@ -6,6 +6,7 @@ import { config } from '../config/env.js';
 
 // Extend Request interface to include user
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       user?: {
@@ -28,7 +29,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
     // Verify token using JWT_SECRET
     const payload = jwt.verify(token, config.jwt.secret as string) as { id: string };
-    
+
     // Find user by ID from token payload
     const user = findUserById(payload.id);
     if (!user) {
@@ -38,20 +39,19 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     // Attach user info to req.user
     req.user = {
       id: user.id,
-      email: user.email
+      email: user.email,
     };
 
     // Call next() to continue to the route handler
     return next();
-
   } catch (error) {
     console.error('Token verification error:', error);
-    
+
     // Handle JWT errors
     if (error instanceof jwt.JsonWebTokenError) {
       return res.status(401).json({ message: 'Invalid token' });
     }
-    
+
     if (error instanceof jwt.TokenExpiredError) {
       return res.status(401).json({ message: 'Token expired' });
     }

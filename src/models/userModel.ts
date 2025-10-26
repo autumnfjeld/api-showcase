@@ -17,24 +17,24 @@ export const users: User[] = [];
 
 // Helper functions for user operations
 export const findUserByEmail = (email: string): User | undefined => {
-  return users.find(user => user.email.toLowerCase() === email.toLowerCase());
+  return users.find((user) => user.email.toLowerCase() === email.toLowerCase());
 };
 
 export const findUserById = (id: string): User | undefined => {
-  return users.find(user => user.id === id);
+  return users.find((user) => user.id === id);
 };
 
 export const createUser = async (user: Omit<User, 'id' | 'created_at'>): Promise<User> => {
   const mockDelay = Math.random() * 10;
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       const newUser: User = {
         ...user,
         id: Date.now().toString(),
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       };
-      
+
       users.push(newUser);
       resolve(newUser);
     }, mockDelay);

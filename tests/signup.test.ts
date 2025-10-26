@@ -9,7 +9,7 @@ describe('Signup API', () => {
       .send({ password: 'password123' })
       .expect(400);
     expect(response1.body.message).toBe('Email and password are required');
-    
+
     // Test missing password
     const response2 = await request(app)
       .post('/auth/signup')
@@ -20,30 +20,21 @@ describe('Signup API', () => {
 
   it('should return 409 for duplicate email', async () => {
     const userData = { email: 'duplicate@example.com', password: 'password123' };
-    
+
     // First signup
-    await request(app)
-      .post('/auth/signup')
-      .send(userData)
-      .expect(201);
-    
+    await request(app).post('/auth/signup').send(userData).expect(201);
+
     // Second signup should fail
-    const response = await request(app)
-      .post('/auth/signup')
-      .send(userData)
-      .expect(409);
+    const response = await request(app).post('/auth/signup').send(userData).expect(409);
     expect(response.body.message).toBe('Email already exists');
   });
 
   it('should create user successfully for valid email and password', async () => {
     const ranNum = Math.floor(Math.random() * 900) + 100;
     const userData = { email: `success${ranNum}@example.com`, password: 'password123' };
-    
-    const response = await request(app)
-      .post('/auth/signup')
-      .send(userData)
-      .expect(201);
-    
+
+    const response = await request(app).post('/auth/signup').send(userData).expect(201);
+
     expect(response.body.email).toBe(userData.email);
     expect(response.body.id).toBeDefined();
     expect(response.body.created_at).toBeDefined();

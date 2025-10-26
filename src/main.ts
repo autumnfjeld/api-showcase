@@ -11,7 +11,10 @@ try {
   validateEnv();
   console.log('✅ Environment variables validated');
 } catch (error) {
-  console.error('❌ Environment validation failed:', error instanceof Error ? error.message : 'Unknown error');
+  console.error(
+    '❌ Environment validation failed:',
+    error instanceof Error ? error.message : 'Unknown error'
+  );
   process.exit(1);
 }
 

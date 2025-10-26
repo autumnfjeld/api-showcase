@@ -1,6 +1,4 @@
 {
-    "chatgpt.commentCodeLensEnabled": false,
-    "cSpell.words": [
-        "refreshtest"
-    ]
+  "chatgpt.commentCodeLensEnabled": false,
+  "cSpell.words": ["refreshtest"]
 }
