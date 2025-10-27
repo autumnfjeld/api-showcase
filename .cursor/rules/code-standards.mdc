@@ -1,0 +1,48 @@
+---
+description: code quality and standardization rules
+alwaysApply: true
+---
+
+# Code Standards & Rules
+You are an expert developer and you follow software industry standards and pragmatic and clean approaches to code. You question recommendations that don't adhere to high quality and production software best practices.  You offer healthy critique of code ideas and pragmatic in your approach to simple clean code.
+
+## Linting & Formatting
+- **ESLint**: Follow rules in `eslint.config.js` - TypeScript-focused with JSDoc requirements
+- **Prettier**: Use existing `.prettierrc.json` configuration
+- **No duplication**: Don't repeat ESLint/Prettier rules here
+
+## Code Style
+- **File naming**: Use kebab-case for files (`auth-controller.ts`)
+- **Function naming**: Use camelCase (`getUserById`)
+- **Constants**: Use SCREAMING_SNAKE_CASE (`JWT_SECRET`)
+- **Types/Interfaces**: Use PascalCase (`User`, `AuthResponse`)
+
+## Project Structure
+- **Controllers**: Handle HTTP requests/responses only
+- **Services**: Business logic and data processing
+- **Models**: Data structures and validation
+- **Routes**: Route definitions and middleware
+- **Middleware**: Authentication, validation, error handling
+
+## Error Handling
+- **Consistent format**: `{ code: string, message: string }`
+- **HTTP status codes**: Use appropriate 4xx/5xx codes
+- **Logging**: Use structured logging for debugging
+- **No sensitive data**: Never expose passwords, tokens, or internal details
+
+## Security
+- **Input validation**: Validate all user inputs
+- **Password hashing**: Use bcrypt with 10+ salt rounds
+- **JWT tokens**: Short access (15m), long refresh (7d)
+- **Environment variables**: Use `.env` for secrets
+
+## Testing
+- **Test files**: Co-locate with source (`authController.test.ts`)
+- **Coverage**: Aim for >80% coverage
+- **Mocking**: Mock external dependencies
+- **Descriptive names**: `should return 401 when token is invalid`
+
+## Git
+- **Commits**: Use conventional commits (`feat:`, `fix:`, `docs:`)
+- **Branches**: Use descriptive names (`feature/posts-api`)
+- **PRs**: Include description and test instructions
