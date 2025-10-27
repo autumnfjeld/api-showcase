@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../src/app.js';
+import app from '../../src/app.js';
 
 describe('Signup API', () => {
   it('should return 400 when email or password is missing', async () => {
